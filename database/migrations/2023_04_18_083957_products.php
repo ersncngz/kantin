@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('Products', function (Blueprint $table) {
             $table->id();
-            $table->integer('barcode_no');
+            $table->string('barcode_no');
             $table->string('product_name');
             $table->decimal('sale_price');
             $table->integer('stock_quantity');
