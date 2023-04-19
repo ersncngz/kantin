@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 
 class ProductController extends Controller
@@ -13,14 +14,16 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            "status" => "success",
-            "data" => Product::all()
-        ]);
+        $barcode = $request->input('barcode_no');
+       $products = DB::table('products')
+                    ->join('sales', 'products.id','=','sales.product_id')
+                    ->select('products.*','sales.*')
+                    ->where('products.barcode_no', '=', $barcode)
+                    ->get();
+                    return response()->json($products);
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -33,7 +36,16 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    { 
+        
+        $barcode = $request->input('barcode_no');
+        $products = DB::table('products')
+                     ->join('sales', 'products.id','=','sales.product_id')
+                     ->select('products.*','sales.*')
+                     ->where('products.barcode_no', '=', $barcode)
+                     ->get();
+                     
+        
         $validator = Validator::make($request->all(), [
             'barcode_no' => 'required',
             'product_name' => 'required',
@@ -54,9 +66,6 @@ class ProductController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         return response()->json([
@@ -65,25 +74,20 @@ class ProductController extends Controller
          ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
+ 
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Product $product)
     {
+        
         $validator = Validator::make($request->all(), [
             'barcode_no' => 'required',
             'product_name' => 'required',
             'sale_price' => 'required',
             'stock_quantity' => 'required',
-            'invoice_date' => 'required',
+           
         ]);
         $product->update($request->all());
         return response()->json([

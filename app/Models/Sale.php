@@ -12,6 +12,6 @@ class Sale extends Model
     protected $guarded = [];
 
     public function getProduct(){
-        return $this->belongsTo('App\Models\Product','id');
+        return $this->belongsTo('Product::class');
     }
 }

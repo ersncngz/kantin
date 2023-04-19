@@ -12,6 +12,6 @@ class Product extends Model
     protected $guarded = [];
 
     public function getSale(){
-        return $this->hasMany('App\Models\Sale','product_id');
+        return $this->hasMany('Sale::class');
     }
 }
