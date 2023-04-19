@@ -22,6 +22,7 @@ use App\Http\Controllers\SaleController;
  
 
     });
+    Route::get('/list', 'App\Http\Controllers\ProductController@list');
     Route::resource('product', ProductController::class);
 
     Route::resource('sale', SaleController::class);

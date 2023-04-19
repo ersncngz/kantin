@@ -14,15 +14,29 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function list()
     {
-        $barcode = $request->input('barcode_no');
-       $products = DB::table('products')
-                    ->join('sales', 'products.id','=','sales.product_id')
-                    ->select('products.*','sales.*')
-                    ->where('products.barcode_no', '=', $barcode)
-                    ->get();
-                    return response()->json($products);
+        return response()->json([
+            "status" => "success",
+            "data" => Product::all()
+        ]);
+    }
+
+     public function index(Request $request)
+    {
+        $barcode_no = $request->input('barcode_no');
+
+         $validatedData = $request->validate([
+         'barcode_no' => 'required|string|max:255',
+     ]);
+     $barcode_no = $request->input('barcode_no');
+     $products = DB::table('products')
+                 ->join('sales', 'products.id','=','sales.product_id')
+                 ->select('products.*','sales.*')
+                 ->where('barcode_no', '=', $barcode_no)
+                 ->get();
+                 
+                 return response()->json($products);
     }
     /**
      * Show the form for creating a new resource.
