@@ -19,10 +19,17 @@ use App\Http\Controllers\SaleController;
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
 
- 
-
     });
-    Route::get('/list', 'App\Http\Controllers\ProductController@list');
+    //Kullanıcı işlemleri
+    Route::post('login', [AuthController::class,'login']);
+    Route::post('register', [AuthController::class, 'register']);
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('logout', [AuthController::class, 'logout']);
+    Route::get('user', [AuthController::class, 'user']);
+});
+    //Ürün Listeleme
+    Route::get('/barcode', 'App\Http\Controllers\ProductController@barcode');
+
     Route::resource('product', ProductController::class);
 
     Route::resource('sale', SaleController::class);
