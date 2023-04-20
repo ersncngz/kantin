@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->decimal('sale_price');
             $table->integer('stock_quantity');
-            $table->datetime('invoice_date');
+            $table->date('invoice_date');
             $table->timestamps();
         });
     }
