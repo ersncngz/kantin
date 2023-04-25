@@ -28,8 +28,8 @@ use App\Http\Controllers\SaleController;
     Route::get('user', [AuthController::class, 'user']);
 });
     //Ürün Listeleme
-    Route::get('/barcode', 'App\Http\Controllers\ProductController@barcode')->middleware('auth:sanctum', 'role:admin');
+    Route::get('/barcode', 'App\Http\Controllers\ProductController@barcode')/*->middleware('auth:sanctum', 'role:admin')*/;
 
-    Route::middleware('auth:sanctum', 'role:admin')->resource('product', ProductController::class);
+    Route::middleware('auth:sanctum', 'role:admin')/*->resource('product', ProductController::class)*/;
 
-    Route::resource('sale', SaleController::class)->middleware('auth');
+    Route::resource('sale', SaleController::class)/*->middleware('auth')*/;
