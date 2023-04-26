@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -62,10 +63,8 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        return response()->json([
-                "status" => "success",
-             "data" => Product::findOrFail($id)
-         ]);
+        $products = Product::with('stock')->find($id);
+        return response()->json($products);
     }
 
  

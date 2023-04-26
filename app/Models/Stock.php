@@ -14,6 +14,6 @@ class Stock extends Model
   
       
         public function Product(){
-            return $this->belongsTo(Product::class);
+            return $this->belongsTo('App\Models\Product');
         }
 }

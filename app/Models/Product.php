@@ -12,7 +12,7 @@ class Product extends Model
     protected $guarded = [];
 
     public function Stock(){
-        return $this->hasMany(Stock::class);
+        return $this->hasMany('App\Models\Stock');
     }
 
     public function getSale(){
