@@ -18,25 +18,22 @@ class ProductController extends Controller
     {
     
         $barcode_no = $request->input('barcode_no');
-
         $validatedData = $request->validate([
         'barcode_no' => 'required|string|max:255',
-    ]);
-    $barcode_no = $request->input('barcode_no');
-    $products = DB::table('products')
-                ->join('sales', 'products.id','=','sales.product_id')
-                ->select('products.*','sales.*')
-                ->where('barcode_no', '=', $barcode_no)
-                ->get();
-                
-                return response()->json($products);
-    }
+        ]);
+        $products = DB::table('products')->where('barcode_no','=',$barcode_no)->get();
+    return response()->json([
+            
+            "data" => $products
+        ]);
+    
+     }
 
-     public function index()
-    {
+     public function index(Request $request)
+    { 
         return response()->json([
-            "status" => "success",
-            "data" => Product::all()
+            'message'=>'success',
+            'data' => Product::all()
         ]);
     }
     /**
@@ -51,35 +48,17 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    { 
-        
-        $barcode = $request->input('barcode_no');
-        $products = DB::table('products')
-                     ->join('sales', 'products.id','=','sales.product_id')
-                     ->select('products.*','sales.*')
-                     ->where('products.barcode_no', '=', $barcode)
-                     ->get();
-                     
-        
-        $validator = Validator::make($request->all(), [
-            'barcode_no' => 'required',
-            'product_name' => 'required',
-            'sale_price' => 'required',
-            'stock_quantity' => 'required',
-            'invoice_date' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => "warning",
-                "message" => $validator->errors()
-            ]);
-        }
-
-       $product = Product::create($request->all());
+    {        
+        $product = new Product;
+        $product->barcode_no = $request->input('barcode_no');
+        $product->product_name = $request->input('product_name');
+        $product->stock_quantity = null; // varsayılan olarak null değer atıyoruz
+        $product->invoice_date = $request->input('invoice_date');
+        $product->save();
         return response()->json([
-            "status" => "success"
-        ], 201);
-    }
+            "status" => "success"         
+     ]);
+            }
 
     public function show($id)
     {
@@ -96,33 +75,23 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        
         $validator = Validator::make($request->all(), [
-            'barcode_no' => 'required',
-            'product_name' => 'required',
-            'sale_price' => 'required',
-            'stock_quantity' => 'required',
-           
+            'barcode_no' => 'required|unique:products,barcode_no,'.$product->id,
+            'product_name' => 'required',           
         ]);
-        $product->update($request->all());
-        return response()->json([
-            "status" => "success"
-        ], 200);
-
-
+        
         if ($validator->fails()) {
             return response()->json([
                 "status" => "warning",
                 "message" => $validator->errors()
             ]);
+        }
         
-}        
-        if (!$product) {
-            return response()->json([
-                "status" => "warning",
-                "message" => "Ürün bulunamadı"
-            ], 404);
-    }
+        $product->update($request->all());
+        
+        return response()->json([
+            "status" => "success"
+        ], 200);
     }
     /**
      * Remove the specified resource from storage.

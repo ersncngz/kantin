@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StockController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,9 +28,15 @@ use App\Http\Controllers\SaleController;
     Route::get('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'user']);
 });
-    //Ürün Listeleme
+    //Barkoda Göre Ürün Listeleme
     Route::get('/barcode', 'App\Http\Controllers\ProductController@barcode')/*->middleware('auth:sanctum', 'role:admin')*/;
 
-    Route::middleware('auth:sanctum', 'role:admin')/*->resource('product', ProductController::class)*/;
+    //Ürün Listeleme
+    Route::/*middleware('auth:sanctum', 'role:admin')->*/resource('product', ProductController::class);
 
+    //Satış
     Route::resource('sale', SaleController::class)/*->middleware('auth')*/;
+  
+    //Stok işlemleri
+    Route::resource('stock', StockController::class);
+
