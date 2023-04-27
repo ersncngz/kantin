@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Sale;
-use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AuthController;
+use App\Models\User;
 
 
 class ProductController extends Controller
@@ -32,10 +34,19 @@ class ProductController extends Controller
 
      public function index(Request $request)
     { 
-        return response()->json([
-            'message'=>'success',
-            'data' => Product::all()
-        ]);
+        // $userId = Auth::id(); // mevcut kullanıcının id'sini alın
+
+        // if (Auth::AuthController()->isAdmin()) {
+        //     $examples = User::withTrashed()->get(); // admin kullanıcısı, tüm öğeleri görüntüler
+        // } else {
+        //     $examples = User::where('user_id', $userId)->withTrashed()->get(); // diğer kullanıcılar, sadece kendi öğelerini görüntüler
+        // }
+
+        // return Product::collection($examples); // API Resource kullanarak öğeleri JSON olarak döndürür
+    return response()->json([
+        "status" => "success",
+        "data" => Product::all()
+    ]);
     }
     /**
      * Show the form for creating a new resource.
@@ -53,18 +64,20 @@ class ProductController extends Controller
         $product = new Product;
         $product->barcode_no = $request->input('barcode_no');
         $product->product_name = $request->input('product_name');
-        $product->stock_quantity = null; // varsayılan olarak null değer atıyoruz
-        $product->invoice_date = $request->input('invoice_date');
+        $product->stock_quantity = '0';
         $product->save();
         return response()->json([
-            "status" => "success"         
+            "status" => "success",  
+            "data" => $product      
      ]);
             }
 
     public function show($id)
     {
-        $products = Product::with('stock')->find($id);
-        return response()->json($products);
+        return response()->json([
+                "status" => "success",
+             "data" => Product::findOrFail($id)
+         ]);
     }
 
  
@@ -75,7 +88,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validator = Validator::make($request->all(), [
-            'barcode_no' => 'required|unique:products,barcode_no,'.$product->id,
+    
             'product_name' => 'required',           
         ]);
         
@@ -95,11 +108,13 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        $product->delete();
+        $product = Product::find($id);
+        $product->delete(); // öğeyi silmek yerine Soft Deleting kullanarak silinmiş olarak işaretler ve deleted_at sütununa tarih ekler
         return response()->json([
-            "status"=>"success",
+            "status" => "success",
+            "message" => "Ürün Başarıyla Silindi"
         ]);
     }
 }

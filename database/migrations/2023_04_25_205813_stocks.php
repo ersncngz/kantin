@@ -16,8 +16,8 @@ return new class extends Migration
             $table->bigInteger('product_id')->unsigned();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');; 
             $table->integer('quantity')->default(0)->nullable();  
-            $table->decimal('stock_price');
-            $table->datetime('invoice_date');
+            $table->decimal('stock_price')->default(0);
+            $table->timestamp('invoice_date');
             $table->timestamps();
         });
     }

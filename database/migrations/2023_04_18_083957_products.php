@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('Products', function (Blueprint $table) {
             $table->id();
             $table->string('barcode_no')->unique();
             $table->string('product_name');
-        
             $table->integer('stock_quantity')->default(0)->nullable();
-            $table->date('invoice_date');
+            $table->timestamp('product_date');
+            $table->timestamp('deleted_at')->default(null)->nullable();;
             $table->timestamps();
         });
     }

@@ -16,4 +16,8 @@ class Stock extends Model
         public function Product(){
             return $this->belongsTo('App\Models\Product');
         }
+        public function sıfır($value)
+    {
+        $this->attributes['quantity'] = max(0, $value);
+    }
 }

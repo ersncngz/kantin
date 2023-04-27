@@ -15,6 +15,7 @@ class StockController extends Controller
      */
     public function index()
     {
+        
         return response()->json([
             'message'=>'success',
             'data' => Stock::all()
@@ -39,7 +40,7 @@ class StockController extends Controller
             'product_id' => 'required',
             'quantity' => 'required',
             'stock_price' => 'required',
-            'invoice_date' => 'required',
+            
             
         ]);
         $product = Product::find($request->input('product_id'));
@@ -50,7 +51,7 @@ class StockController extends Controller
         $new_stock->product_id = $product->id;
         $new_stock->quantity = $request->input('quantity');
         $new_stock->stock_price = $request->input('stock_price');
-        $new_stock->invoice_date =$request->input('invoice_date');
+    
         $new_stock->save();
         return response()->json([
                     'status' => 'success'
@@ -67,7 +68,7 @@ class StockController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Stock $stock)
+    public function show(stock $stock)
     {
         $stock->load('Product');
         return response()->json([
@@ -93,8 +94,7 @@ class StockController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id' => 'required',
             'quantity' => 'required',
-            'stock_price' => 'required',
-            'invoice_date' => 'required',
+            
         ]);
         
         $stock = Stock::find($id);
@@ -102,12 +102,12 @@ class StockController extends Controller
         $old_quantity = $stock->quantity;
         $stock->quantity = $request->input('quantity');
         $stock->stock_price = $request->input('stock_price');
-        $stock->invoice_date = $request->input('invoice_date');
         $stock->save();
         
         $product = Product::find($request->input('product_id'));
         $product->stock_quantity -= $old_quantity;
         $product->stock_quantity += $request->input('quantity');
+       
         $product->save();
         
         return response()->json([
