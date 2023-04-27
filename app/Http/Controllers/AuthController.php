@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function login(Request $request): \Illuminate\Http\JsonResponse
-    {        
+    {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -21,13 +21,13 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         $user = User::where('email', $request->email)->first();
- 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid login credentials.',
             ], 401);
         }
-        
+
 
         $token = $user->createToken('authToken')->plainTextToken;
 
@@ -52,21 +52,21 @@ class AuthController extends Controller
 
     public function register(Request $request): \Illuminate\Http\JsonResponse
     {
-    $validatedData = $request->validate([
-        'name' => 'required|max:255',
-        'email' => 'required|email|unique:users,email|max:255',
-        'password' => 'required|min:8',
-    ]);
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:users,email|max:255',
+            'password' => 'required|min:8',
+        ]);
 
-    $validatedData['password'] = bcrypt($validatedData['password']);
+        $validatedData['password'] = bcrypt($validatedData['password']);
 
-    $user = User::create($validatedData);
+        $user = User::create($validatedData);
 
-    $token = $user->createToken('authToken')->plainTextToken;
+        $token = $user->createToken('authToken')->plainTextToken;
 
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-    ]);
-}
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ]);
+    }
 }

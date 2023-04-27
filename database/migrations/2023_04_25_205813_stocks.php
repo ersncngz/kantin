@@ -4,6 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/* $table->id();
+            $table->bigInteger('product_id')->unsigned();
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade'); 
+            $table->bigInteger('list_sales_id')->unsigned();
+            $table->foreign('list_sales_id')->references('id')->on('list_sales');
+            $table->integer('piece');
+            $table->integer('basket_price');
+            $table->integer('total_price');
+            $table->timestamps();*/ 
 return new class extends Migration
 {
     /**

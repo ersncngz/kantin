@@ -19,21 +19,20 @@ class ProductController extends Controller
      */
     public function barcode(Request $request)
     {
-    
+
         $barcode_no = $request->input('barcode_no');
         $validatedData = $request->validate([
-        'barcode_no' => 'required|string|max:255',
+            'barcode_no' => 'required|string|max:255',
         ]);
-        $products = DB::table('products')->where('barcode_no','=',$barcode_no)->get();
-    return response()->json([
-            
+        $products = DB::table('products')->where('barcode_no', '=', $barcode_no)->get();
+        return response()->json([
+
             "data" => $products
         ]);
-    
-     }
+    }
 
-     public function index(Request $request)
-    { 
+    public function index(Request $request)
+    {
         // $userId = Auth::id(); // mevcut kullanıcının id'sini alın
 
         // if (Auth::AuthController()->isAdmin()) {
@@ -43,10 +42,10 @@ class ProductController extends Controller
         // }
 
         // return Product::collection($examples); // API Resource kullanarak öğeleri JSON olarak döndürür
-    return response()->json([
-        "status" => "success",
-        "data" => Product::all()
-    ]);
+        return response()->json([
+            "status" => "success",
+            "data" => Product::all()
+        ]);
     }
     /**
      * Show the form for creating a new resource.
@@ -60,27 +59,28 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {        
+    {
         $product = new Product;
         $product->barcode_no = $request->input('barcode_no');
         $product->product_name = $request->input('product_name');
         $product->stock_quantity = '0';
         $product->save();
         return response()->json([
-            "status" => "success",  
-            "data" => $product      
-     ]);
-            }
-
-    public function show($id)
-    {
-        return response()->json([
-                "status" => "success",
-             "data" => Product::findOrFail($id)
-         ]);
+            "status" => "success",
+            "data" => $product
+        ]);
     }
 
- 
+    public function show(Product $product)
+    {
+        $product->load('stocks');
+        return response()->json([
+            "status" => "success",
+            "data" => $product,
+        ]);
+    }
+
+
 
     /**
      * Update the specified resource in storage.
@@ -88,19 +88,19 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validator = Validator::make($request->all(), [
-    
-            'product_name' => 'required',           
+
+            'product_name' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 "status" => "warning",
                 "message" => $validator->errors()
             ]);
         }
-        
+
         $product->update($request->all());
-        
+
         return response()->json([
             "status" => "success"
         ], 200);

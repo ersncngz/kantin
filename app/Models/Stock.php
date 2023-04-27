@@ -11,12 +11,13 @@ class Stock extends Model
     protected $table = 'stocks';
 
     protected $guarded = [];
-  
-      
-        public function Product(){
-            return $this->belongsTo('App\Models\Product');
-        }
-        public function sıfır($value)
+
+
+    public function Product()
+    {
+        return $this->belongsTo('App\Models\Product');
+    }
+    public function sıfır($value)
     {
         $this->attributes['quantity'] = max(0, $value);
     }

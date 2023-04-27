@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     use HasFactory;
-    protected $table = 'Sales';
-    protected $guarded = [];
+    protected $table = 'sales';
 
-    public function getProduct(){
-        return $this->belongsTo('Product::class');
+    protected $fillable = ['id','total_price'];
+    protected $attributes = ['total_price' => 0];
+
+
+    public function getBasket(){
+        return $this->hasMany('App\Models\Basket');
     }
 }
