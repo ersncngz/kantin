@@ -95,6 +95,13 @@ class StockController extends Controller
             'quantity' => 'required',
 
         ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => "warning",
+                "message" => $validator->errors()
+            ]);
+        }
 
         $stock = Stock::find($id);
 
@@ -112,13 +119,7 @@ class StockController extends Controller
         return response()->json([
             'status' => 'success'
         ], 200);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => "warning",
-                "message" => $validator->errors()
-            ]);
-        }
+        
     }
 
     /**

@@ -11,10 +11,10 @@ class Basket extends Model
     protected $table = 'baskets';   
     protected $fillable = ['sale_id', 'product_id', 'product_price', 'piece', 'total_price'];
 
-    public function getProduct(){
+    public function Product(){
         return $this->belongsToMany('App\Models\Product');
     }
-    public function getSale(){
+    public function Sale(){
         return $this->belongsTo('App\Models\Sale');
     }
 }

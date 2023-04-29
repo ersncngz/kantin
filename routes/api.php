@@ -4,8 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\BasketController;
+use App\Http\Controllers\SaleController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,5 +40,9 @@ Route::resource('sale', SaleController::class)/*->middleware('auth')*/;
 
 //Stok işlemleri
 Route::resource('stock', StockController::class);
+
+//Sepet İşlemleri
+Route::resource('basket', BasketController::class);
+
 
 Route::get('stock/product/{id}', [StockController::class, 'productGet']);

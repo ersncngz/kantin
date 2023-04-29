@@ -18,7 +18,7 @@ return new class extends Migration
             $table->bigInteger('sale_id')->unsigned();
             $table->foreign('sale_id')->references('id')->on('sales');
             $table->integer('piece');
-            $table->integer('basket_price');
+            $table->integer('product_price');
             $table->integer('total_price');
             $table->timestamps();
         });
