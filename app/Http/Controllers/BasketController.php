@@ -44,7 +44,6 @@ class BasketController extends Controller
         }
 
         $basketItems = (array) $request->input('basket_items');
-        $updatedStocks = [];
         foreach ($basketItems as $item) {
             // Sepet kaydı oluştur
             $basket = new Basket();
@@ -56,48 +55,13 @@ class BasketController extends Controller
             $basket->save();
 
             // Ürün stoklarını güncelle
-            $product = Product::findOrFail($basket->product_id);
-            $stocks = Stock::where('product_id', $product->id)
-                ->orderBy('stock_price', 'asc')
-                ->orderBy('invoice_date', 'asc')
-                ->get();
-            $stock_quantity = $basket->piece;
-
-            foreach ($stocks as $key => $stock) {
-                while ($stock_quantity > 0 && $stock) {
-                    if ($stock->quantity >= $stock_quantity) {
-                        $stock->quantity -= $stock_quantity;
-                        $stock_quantity = 0;
-                    } else {
-                        $stock_quantity -= $stock->quantity;
-                        $stock->quantity = 0;
-                    }
-
-                    $stock->save();
-                    $updatedStocks[] = $stock;
-
-                    $product->stock_quantity -= $stock_quantity * $stock->price;
-
-                    // Bir sonraki stok kaydını al
-                    $stock = $stocks->get($key + 1);
-                }
-
-                if ($stock_quantity <= 0) {
-                    break;
-                }
-
-                $stock->save();
-                $updatedStocks[] = $stock;
-
-                $product->stock -= $stock_quantity * $stock->price;
-            }
-
-            $product->save();
-
-            $product->stock_quantity -= $basket->piece;
-            $product->save();
-            // Satış toplam tutarını güncelle
-            $sale->total_price += $basket->total_price;
+           // $product = Product::findOrFail($basket->product_id);
+                Stock::where('product_id',  $item['product_id'])
+                ->where('stock_price',$item['product_price'])
+                ->decrement('quantity',$item['piece']);
+                Product::where('id',$item['product_id'])
+                ->decrement('stock_quantity',$item['piece']);
+             $sale->total_price += $basket->total_price;
         }
 
         $sale->save();
@@ -105,7 +69,6 @@ class BasketController extends Controller
         // Cevap döndür
         return response()->json([
             'sale' => $sale,
-            'basket' => $basket
         ], 201);
     }
 

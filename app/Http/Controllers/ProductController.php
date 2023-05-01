@@ -24,11 +24,26 @@ class ProductController extends Controller
         $validatedData = $request->validate([
             'barcode_no' => 'required|string|max:255',
         ]);
-        $products = DB::table('products')->where('barcode_no', '=', $barcode_no)->get();
-        return response()->json([
-
-            "data" => $products
-        ]);
+        $products = DB::table('products')->where('barcode_no', '=', $barcode_no)->where('stock_quantity','>','0')->get();
+        if($products->count() > 0){
+            $product_id = $products[0]->id;
+            $min_price = DB::table('stocks')
+            ->where('product_id', '=', $product_id)
+            ->min('stock_price');
+            if($min_price === 0){
+                return response()->json([
+                    "message" => " Product stock not found" 
+                ]);
+            }
+            $products[0]->min_price = $min_price;
+            return response()->json([
+                "data" => $products
+            ]);
+        } else {
+            return response()->json([
+                "message" => "Product not found"
+            ], 404);
+        } 
     }
 
     public function index(Request $request)
