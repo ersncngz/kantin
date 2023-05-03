@@ -25,7 +25,7 @@ class ProductController extends Controller
         $validatedData = $request->validate([
             'barcode_no' => 'required|string|max:255',
         ]);
-        $products = DB::table('products')
+         $products = DB::table('products')
         ->join('stocks', 'products.id', '=', 'stocks.product_id')
         ->where('products.barcode_no', '=', $barcode_no)
         ->where('stocks.quantity','>',0)
@@ -33,9 +33,10 @@ class ProductController extends Controller
         
         if($products ->count() > 0)
       {
-            $product_id = $products[1]->product_id;
+            $product_id = $products[0]->product_id;
             $min_price = DB::table('stocks')
             ->where('product_id', '=', $product_id)
+            ->where('quantity', '>', 0)
             ->min('stock_price');
             
             if($min_price === 0){
@@ -44,6 +45,9 @@ class ProductController extends Controller
                 ]);
             }
             
+           
+            $products[0]->stocks =  $min_price;
+
             return response()->json([
                 "products" => $products,
                 "min_price" =>$min_price
@@ -99,7 +103,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('stocks');
+        
         return response()->json([
             "status" => "success",
             "data" => $product,
