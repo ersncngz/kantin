@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -18,48 +19,33 @@ class ProductController extends Controller
      * Display a listing of the resource.
      */
     public function barcode(Request $request)
- 
-    { 
+    {
 
         $barcode_no = $request->input('barcode_no');
         $validatedData = $request->validate([
             'barcode_no' => 'required|string|max:255',
         ]);
-         $products = DB::table('products')
-        ->join('stocks', 'products.id', '=', 'stocks.product_id')
-        ->where('products.barcode_no', '=', $barcode_no)
-        ->where('stocks.quantity','>',0)
-        ->get();
-        
-        if($products ->count() > 0)
-      {
-            $product_id = $products[0]->product_id;
-            $min_price = DB::table('stocks')
-            ->where('product_id', '=', $product_id)
-            ->where('quantity', '>', 0)
-            ->min('stock_price');
-            
-            if($min_price === 0){
-                return response()->json([
-                    "message" => " Product stock not found" 
-                ]);
-            }
-            
-           
-            $products[0]->stocks =  $min_price;
+        $products = Product::query()->where('barcode_no', '=', $barcode_no)->limit(1)->get();
 
+        if (count($products) == 0) {
             return response()->json([
-                "products" => $products,
-                "min_price" =>$min_price
-            ]);
-            
-        } else {
-            return response()->json([
-                "message" => "Product not found"
+                "message" => "Ürün bulunamadı"
             ], 404);
-        } 
-    }
+        }
 
+        $product = $products[0];
+
+        $stocks = Stock::query()
+            ->where('product_id', '=', $product->id)
+            ->where('quantity', '>', 0)
+            ->get();
+
+        $product->stocks = $stocks;
+
+        return response()->json([
+            "data" => $product
+        ]);
+    }
 
     public function index(Request $request)
     {
@@ -90,20 +76,31 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = new Product;
-        $product->barcode_no = $request->input('barcode_no');
-        $product->product_name = $request->input('product_name');
-        $product->stock_quantity = '0';
-        $product->save();
-        return response()->json([
-            "status" => "success",
-            "data" => $product
-        ]);
+        try {
+            $product = new Product;
+            $product->barcode_no = $request->input('barcode_no');
+            $product->product_name = $request->input('product_name');
+            $product->product_date = date('Y-m-d H:i:s');
+            $product->stock_quantity = '0';
+            $product->save();
+
+            return response()->json([
+                "status" => "success",
+                "data" => $product
+            ], 201);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                "status" => "error",
+                "message" => $e->getMessage()
+            ]);
+        }
+
     }
 
     public function show(Product $product)
     {
-        
+        $product->load('stocks');
         return response()->json([
             "status" => "success",
             "data" => $product,

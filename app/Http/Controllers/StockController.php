@@ -51,18 +51,12 @@ class StockController extends Controller
         $new_stock->product_id = $product->id;
         $new_stock->quantity = $request->input('quantity');
         $new_stock->stock_price = $request->input('stock_price');
+        $new_stock->invoice_date = date('Y-m-d H:i:s');
 
         $new_stock->save();
         return response()->json([
             'status' => 'success'
         ], 201);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => "warning",
-                "message" => $validator->errors()
-            ]);
-        }
     }
 
     /**
@@ -95,7 +89,7 @@ class StockController extends Controller
             'quantity' => 'required',
 
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 "status" => "warning",
@@ -119,7 +113,7 @@ class StockController extends Controller
         return response()->json([
             'status' => 'success'
         ], 200);
-        
+
     }
 
     /**
@@ -149,7 +143,7 @@ class StockController extends Controller
         ], 200);
     }
     public function productGet($id) {
-        
+
         return response()->json([
             'status' => 'success',
             'data' => Stock::where(['product_id' => $id, ['quantity', '>', 0]])->get()

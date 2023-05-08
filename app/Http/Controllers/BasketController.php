@@ -32,55 +32,83 @@ class BasketController extends Controller
      */
     public function store(Request $request)
     {
-       // Satış oluştur
-       $newSale = new Sale();
-       $newSale->save();
-       $saleId = $newSale->id;
+
+        // validasyon
+        $request->validate([
+            'basket_items' => 'required|array',
+            'basket_items.*.product_id' => 'required|integer|exists:products,id',
+            'basket_items.*.stock_id' => 'required|integer|exists:stocks,id',
+            'basket_items.*.piece' => 'required|integer|min:1',
+        ]);
+
+        // requestten gelen verileri al
+        $basketItems = (array)$request->input('basket_items');
+
+        // satış için hazırlık
+        $productPriceList = [];
+
+        // stok kontrolü
+        foreach ($basketItems as $item) {
+            $stock = Stock::query()->find($item['stock_id']);
+
+            if ($stock->quantity < $item['piece']) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Stokta yeterli ürün yok.',
+                    'product_id' => $item['product_id'],
+                ], 400);
+            }
+
+            $productPriceList[$item['stock_id']] = [
+                'product_id' => $item['product_id'], // baskets tablosunda karşılığı => product_id
+                'stock_price' => $stock->stock_price, // baskets tablosunda karşılığı => product_price
+                'piece' => $item['piece'], // baskets tablosunda karşılığı => piece
+                'total_price' => $stock->stock_price * $item['piece'], // baskets tablosunda karşılığı => total_price
+                'stock_id' => $item['stock_id'],
+            ];
+
+        }
+
+        // $productPriceList dizisini içerisindeki total_price değerlerini topla
+        $totalPrice = array_sum(array_column($productPriceList, 'total_price'));
+
+        // Satış oluştur
+        // Sale modelinin içerisinde sadece total_price eklenecek ve kaydedilecek ve geriye sale_id döndürülecek
+        $sale = Sale::query()->create([
+            'total_price' => $totalPrice,
+            'sale_date' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Sepet kaydı oluştur
+        foreach ($productPriceList as $item) {
+
+            // Ürün şatışa hazırlanıyor
+            Basket::query()->create([
+                'sale_id' => $sale->id,
+                'product_id' => $item['product_id'],
+                'product_price' => $item['stock_price'],
+                'piece' => $item['piece'],
+                'total_price' => $item['total_price'],
+            ]);
+
+            // Ürün stoklarını güncelle
+            $stock = Stock::query()->find($item['stock_id']);
+            $stock->quantity = $stock->quantity - $item['piece'];
+            $stock->save();
+
+            // ürünü ürün tablosundaki stoktan düş
+            $product = Product::query()->find($item['product_id']);
+            $product->stock_quantity = $product->stock_quantity - $item['piece'];
+            $product->save();
+        }
 
 
-       $sale = Sale::find($saleId);
-       if (!$sale) {
-           return response()->json(['error' => 'Sale not found.'], 404);
-       }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Satış başarılı.',
+            'sale_id' => $sale->id,
+        ], 201);
 
-       $basketItems = (array) $request->get('basket_items');
-       foreach ($basketItems as $item) {
-           // Sepet kaydı oluştur
-           $basket = new Basket();
-           $basket->sale_id = $saleId;
-           $basket->product_id = $item['product_id'];
-           $basket->product_price = $item['product_price'];
-           $basket->piece = $item['piece'];
-           $basket->total_price = $basket->product_price * $basket->piece;
-           $basket->save();
-
-           // Ürün stoklarını güncelle
-        
-          $stock = Stock::where('product_id',  $item['product_id'])
-             ->first();
-        //   dd($stock);
-                if ($stock->quantity - $item['piece'] < 0) {
-                    $item['piece'] = $stock->quantity; // "piece" değerini stoktaki son miktarla sınırlandır.
-                    echo "Stokta yeterli ürün yok. Stoktaki son ürün sayısı: " . $stock->quantity;
-             
-                }
-                else{
-               Stock::where('product_id',  $item['product_id'])
-               ->decrement('quantity',$item['piece']);
-               Product::where('product_id',$item['product_id'])
-               ->decrement('stock_quantity',$item['piece']);
-            $sale->total_price += $basket->total_price;
-            
-           
-       }
-    }
-
-       $sale->save();
-
-       // Cevap döndür
-       return response()->json([
-           'sale' => $sale,
-       ], 201);
     }
 
     /**
